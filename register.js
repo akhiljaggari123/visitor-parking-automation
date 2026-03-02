@@ -84,6 +84,8 @@ async function register() {
 
     if (state.lastRegistrationDate === today) {
         console.log('Already registered today.');
+        // Notify the user even if skipping to confirm the state
+        await notify('Skipping registration: Car is already registered for today.');
         return;
     }
 
@@ -154,7 +156,12 @@ async function register() {
     fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
 }
 
-register().catch(err => {
-    console.error(err);
+register().catch(async (err) => {
+    console.error('CRITICAL UNCAUGHT ERROR:', err);
+    try {
+        await notify(`CRITICAL SCRIPT CRASH: ${err.message}\n\nStack Trace:\n${err.stack}`);
+    } catch (notifyError) {
+        console.error('Failed to send crash notification:', notifyError);
+    }
     process.exit(1);
 });
