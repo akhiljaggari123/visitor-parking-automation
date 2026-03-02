@@ -16,13 +16,13 @@ const CONFIG = {
     notifications: {
         email: {
             enabled: true,
-            user: 'akhiljaggari@gmail.com',
-            pass: 'dzbbmlculakxmbyu',
-            to: 'akhiljaggari@gmail.com'
+            user: process.env.EMAIL_USER || 'akhiljaggari@gmail.com',
+            pass: process.env.EMAIL_PASS || 'dzbbmlculakxmbyu',
+            to: process.env.EMAIL_TO || 'akhiljaggari@gmail.com'
         },
         iphone: {
-            enabled: true, // Set to true to enable
-            topic: 'car' // Updated to user's choice
+            enabled: true,
+            topic: process.env.NTFY_TOPIC || 'car'
         }
     }
 };
@@ -123,8 +123,12 @@ async function register() {
 
             if (content.includes('Approved')) {
                 console.log('Registration successful!');
-                state.consecutiveDays += 1;
-                state.onBreak = false;
+                if (state.onBreak) {
+                    state.consecutiveDays = 1;
+                    state.onBreak = false;
+                } else {
+                    state.consecutiveDays += 1;
+                }
                 await notify(`Registration successful. Day ${state.consecutiveDays} in a row.`, screenshotPath);
             } else if (lowerContent.includes('limit') || lowerContent.includes('maximum') || lowerContent.includes('exceeded') || lowerContent.includes('break')) {
                 console.log('Limit reached according to website.');

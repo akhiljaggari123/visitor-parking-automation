@@ -4,6 +4,9 @@ on:
     - cron: '46 16 * * *' # 10:46 AM CST is 4:46 PM UTC
   workflow_dispatch: # Allows manual trigger
 
+permissions:
+  contents: write
+
 jobs:
   register:
     runs-on: ubuntu-latest
@@ -15,6 +18,11 @@ jobs:
       - name: Install dependencies
         run: npm install && npx playwright install-deps && npx playwright install chromium
       - name: Run Registration
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
         run: node register.js
       - name: Commit state changes
         run: |
