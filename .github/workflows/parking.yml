@@ -1,0 +1,25 @@
+name: Daily Parking Registration
+on:
+  schedule:
+    - cron: '46 16 * * *' # 10:46 AM CST is 4:46 PM UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install && npx playwright install-deps && npx playwright install chromium
+      - name: Run Registration
+        run: node register.js
+      - name: Commit state changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add state.json
+          git commit -m "Update parking state" || echo "No changes to commit"
+          git push
